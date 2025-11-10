@@ -1,0 +1,54 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+function Login() {
+
+    let history=useNavigate();
+
+    const [credentials, setCredentials] = useState({email:"",password:""});
+
+    const handleChange = (e) => {
+        setCredentials({ ...credentials, [e.target.name]: e.target.value });
+    }
+
+    const handlesubmit= async(e)=>{  
+        e.preventDefault();
+        const response = await fetch("http://localhost:5000/api/auth/login", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({email:credentials.email,password:credentials.password})
+        });
+
+        let result = await response.json(); 
+        // console.log(result);
+        if(result.success){
+            localStorage.setItem("token",result.token)
+            history("/home");
+            // history.push("/home");
+        }else{
+            alert("Please enter valid credentials !!!")
+        }
+
+       
+    }
+    return (
+        <>
+            <form className='container'  onSubmit={handlesubmit}>
+                <div className="mb-3">
+                    <label htmlFor="email" className="form-label">Email address</label>
+                    <input type="email" name='email' className="form-control" id="email" value={credentials.email} aria-describedby="emailHelp" onChange={handleChange} /> 
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="password" className="form-label">Password</label>
+                    <input type="password" minLength={5} required name="password" className="form-control" value={credentials.password} id="password" onChange={handleChange} />
+                </div>
+                <button type="submit" className="btn btn-primary">Submit</button>
+            </form>
+
+        </>
+    )
+}
+
+export default Login;
